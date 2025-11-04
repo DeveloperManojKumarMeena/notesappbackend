@@ -192,5 +192,3 @@ Manoj Kumar Meena
 🌐 LinkedIn
  | 💻 GitHub
 
-Would you like me to generate this README in Markdown format with emojis and styling (for GitHub) or keep it simple text-based for local documentation?
-I can also tailor it specifically for React + Node + Express + MongoDB or Next.js + Express + MongoDB, depending on your exact setup.
