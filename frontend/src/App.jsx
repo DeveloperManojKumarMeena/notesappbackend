@@ -1,21 +1,19 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 
-// API base - empty string means relative to current origin.
-// If your backend runs on another origin, set this to e.g. 'http://localhost:5000'
-const API_BASE = ''
+// Prefer env; fallback to /api so we can use Vite proxy
+const API_BASE = import.meta.env.VITE_API_BASE || '/api'
 
 function App() {
   const [notes, setNotes] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  // theme: 'light' | 'dark'
   const [theme, setTheme] = useState(() => {
     try {
       const saved = localStorage.getItem('theme')
       if (saved) return saved
       if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark'
-    } catch (e) {}
+    } catch {}
     return 'light'
   })
 
@@ -24,26 +22,23 @@ function App() {
   const [editingId, setEditingId] = useState(null)
   const [formLoading, setFormLoading] = useState(false)
 
-  useEffect(() => {
-    fetchNotes()
-  }, [])
+  useEffect(() => { fetchNotes() }, [])
 
-  // apply theme to document and persist
   useEffect(() => {
     try {
       document.documentElement.setAttribute('data-theme', theme)
       localStorage.setItem('theme', theme)
-    } catch (e) {}
+    } catch {}
   }, [theme])
 
   async function fetchNotes() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch(`${API_BASE}/notes`)
+      const res = await fetch(`${API_BASE}/notes`, { headers: { Accept: 'application/json' } })
       if (!res.ok) throw new Error(`Failed to fetch notes: ${res.status}`)
       const data = await res.json()
-      setNotes(data)
+      setNotes(Array.isArray(data) ? data : [])
     } catch (err) {
       setError(err.message)
     } finally {
@@ -72,15 +67,17 @@ function App() {
     try {
       let res
       if (editingId) {
+        // PATCH /notes/:id
         res = await fetch(`${API_BASE}/notes/${editingId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
           body: JSON.stringify(payload),
         })
       } else {
+        // POST /notes
         res = await fetch(`${API_BASE}/notes`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
           body: JSON.stringify(payload),
         })
       }
@@ -98,16 +95,21 @@ function App() {
   async function handleDelete(id) {
     if (!confirm('Delete this note?')) return
     try {
-      const res = await fetch(`http://localhost:3000/notes`, { method: 'DELETE' })
+      // DELETE /notes/:id  (no body)
+      const res = await fetch(`${API_BASE}/notes/${id}`, {
+        method: 'DELETE',
+        headers: { Accept: 'application/json' },
+      })
       if (!res.ok) throw new Error(`Delete failed: ${res.status}`)
-      setNotes((prev) => prev.filter((n) => n.id !== id && n._id !== id))
+      setNotes((prev) => prev.filter((n) => (n.id ?? n._id ?? n._doc?.id) !== id))
     } catch (err) {
       setError(err.message)
     }
   }
 
   function handleEdit(note) {
-    setEditingId(note.id ?? note._id ?? null)
+    const id = note.id ?? note._id ?? note._doc?.id ?? null
+    setEditingId(id)
     setTitle(note.title ?? '')
     setDescription(note.description ?? '')
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -159,11 +161,7 @@ function App() {
                 {formLoading ? (editingId ? 'Updating...' : 'Creating...') : editingId ? 'Update Note' : 'Create Note'}
               </button>
               {editingId && (
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  className="secondary"
-                >
+                <button type="button" onClick={resetForm} className="secondary">
                   Cancel
                 </button>
               )}

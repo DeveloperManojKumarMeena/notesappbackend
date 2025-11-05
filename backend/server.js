@@ -1,33 +1,42 @@
-const express = require('express');
+const express = require('express')
+const cors = require('cors')
 
-const app = express();
-app.use(express.json());
+const app = express()
+
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+  methods: ['GET','POST','PATCH','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization'],
+}))
+app.use(express.json())
+
 let notes = []
+let nextId = 1
 
-app.get('/notes',(req,res)=>{
-  res.json(notes);
+app.get('/notes', (req, res) => { res.json(notes) })
+app.post('/notes', (req, res) => {
+  const { title = '', description = '' } = req.body || {}
+  const note = { id: String(nextId++), title, description }
+  notes.push(note)
+  res.status(201).json(note)
+})
+app.patch('/notes/:id', (req, res) => {
+  const { id } = req.params
+  const idx = notes.findIndex(n => n.id === id)
+  if (idx === -1) return res.status(404).json({ error: 'Not found' })
+  const { title, description } = req.body || {}
+  const updated = { ...notes[idx], ...(title !== undefined && { title }), ...(description !== undefined && { description }) }
+  notes[idx] = updated
+  res.json(updated)
+})
+app.delete('/notes/:id', (req, res) => {
+  const { id } = req.params
+  const idx = notes.findIndex(n => n.id === id)
+  if (idx === -1) return res.status(404).json({ error: 'Not found' })
+  notes.splice(idx, 1)
+  res.status(204).end()
 })
 
-app.post('/notes',(req,res)=>{
-  notes.push(req.body);
-  res.status(201).send('Note added');
-})
+app.use((req, res) => res.status(404).json({ error: 'Route not found' }))
 
-app.patch('/notes/:index',(req,res)=>{
-  const index = req.params.index; 
-  notes[index] = req.body;
-  res.send('Note updated');
-})
-
-app.delete('/notes/:index',(req,res)=>{
-  const index = req.params.index; 
-  notes.splice(index,1);
-  res.send('Note deleted');
-})
-
-
-
-
-app.listen(3000, () => {
-  console.log('Server is running on port 3000');
-});
+app.listen(3000, () => console.log('API on http://localhost:3000'))
