@@ -1,0 +1,77 @@
+:root{
+  --bg: #f7f8fb;
+  --card: #ffffff;
+  --muted: #6b7280;
+  --accent: #4f46e5;
+  --danger: #dc2626;
+  --border: #e6e9ef;
+  --text: #0f172a;
+}
+
+*{box-sizing:border-box}
+body{font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial; background:var(--bg); color:#0f172a; margin:0}
+
+.app-container{max-width:980px; margin:32px auto; padding:20px}
+header{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-bottom:18px}
+header h1{margin:0;font-size:1.6rem}
+.header-top{display:flex;align-items:center;justify-content:space-between;width:100%}
+.header-controls{display:flex;gap:8px;align-items:center}
+.subtitle{margin:0;color:var(--muted);font-size:0.95rem}
+
+main{display:grid;grid-template-columns:1fr;gap:20px}
+
+.note-form{background:var(--card);border:1px solid var(--border);padding:16px;border-radius:10px;box-shadow:0 6px 18px rgba(15,23,42,0.04)}
+.note-form h2{margin:0 0 10px 0;font-size:1.1rem}
+.note-form form{display:flex;flex-direction:column;gap:10px}
+.note-form label{display:flex;flex-direction:column;align-items:flex-start;font-size:0.9rem;color:var(--muted)}
+.note-form input,.note-form textarea{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;margin-top:6px;font-size:0.95rem}
+
+.form-actions{display:flex;gap:8px;margin-top:6px}
+.primary{background:var(--accent);color:white;border:none;padding:8px 12px;border-radius:8px;cursor:pointer}
+.primary:disabled{opacity:0.6;cursor:not-allowed}
+.secondary{background:transparent;border:1px solid var(--border);padding:8px 12px;border-radius:8px;cursor:pointer}
+
+.error{margin-top:8px;color:var(--danger);font-size:0.95rem}
+
+.notes-list{background:transparent}
+.notes-list h2{margin:0 0 8px 0}
+.empty{color:var(--muted)}
+
+.notes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.note-card{background:var(--card);padding:12px;border-radius:10px;border:1px solid var(--border);display:flex;flex-direction:column;gap:8px;min-height:100px}
+.note-title{margin:0;font-size:1rem}
+.note-desc{margin:0;color:#111827}
+.note-actions{margin-top:auto;display:flex;gap:8px}
+.note-actions button{padding:6px 8px;border-radius:8px;border:1px solid var(--border);background:transparent;cursor:pointer}
+.note-actions .danger{background:transparent;color:var(--danger);border-color:rgba(220,38,38,0.12)}
+
+.theme-toggle{background:transparent;border:1px solid var(--border);padding:6px 10px;border-radius:8px;cursor:pointer}
+.theme-toggle:hover{filter:brightness(0.98)}
+
+/* dark theme overrides */
+[data-theme="dark"]{
+  --bg: #071025;
+  --card: #071428;
+  --muted: #9aa4b2;
+  --accent: #7c5cff;
+  --danger: #ff6b6b;
+  --border: rgba(255,255,255,0.06);
+  --text: #e6eef8;
+}
+
+[data-theme="dark"] body{background:var(--bg)}
+[data-theme="dark"] .note-form, [data-theme="dark"] .note-card{box-shadow:none}
+[data-theme="dark"] .note-desc{color:#dbeafe}
+[data-theme="dark"] .note-title{color:var(--text)}
+[data-theme="dark"] .subtitle{color:var(--muted)}
+[data-theme="dark"] .primary{background:var(--accent)}
+[data-theme="dark"] body, [data-theme="dark"] .app-container{color:var(--text)}
+
+@media (min-width:900px){
+  main{grid-template-columns:350px 1fr}
+  .note-form{height:fit-content}
+}
+
+/* small helpers */
+.note-card .note-title em{color:var(--muted);font-style:normal}
+
